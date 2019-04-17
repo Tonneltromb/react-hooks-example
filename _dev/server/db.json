@@ -1,9 +1,12 @@
 {
+  "users": [
+    { "id": 1, "name": "Ivan", "age": "26" },
+    { "id": 2, "name": "Nick", "age": "20" },
+    { "id": 3, "name": "Helen", "age": "32" }
+  ],
   "posts": [
-    { "id": 1, "title": "json-server", "author": "typicode" }
-  ],
-  "comments": [
-    { "id": 1, "body": "some comment", "postId": 1 }
-  ],
-  "profile": { "name": "typicode" }
+    { "id": 1, "body": "some comment"},
+    { "id": 2, "body": "hello"},
+    { "id": 3, "body": "hi"}
+  ]
 }
