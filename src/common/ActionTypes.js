@@ -1,6 +1,7 @@
 const ActionTypes = {
     USER: {
         GET: "GET",
+        ADD: "ADD",
         REMOVE: "REMOVE"
     }
 };
