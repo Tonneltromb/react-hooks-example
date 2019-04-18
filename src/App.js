@@ -6,6 +6,7 @@ import {AppContext} from './contexts/app.context';
 
 import './App.css';
 import Users from "./components/Users/Users";
+import TestComponent from "./components/TestComponent/TestComponent";
 
 const App = (props) => {
     const [state, dispatch] = useReducer(reducer, initialState);
@@ -13,8 +14,9 @@ const App = (props) => {
     return (
         <div className="App">
             <AppContext.Provider value={{dispatch, state}}>
-                <Users/>
-                <Users/>
+                {/*<Users/>*/}
+                {/*<Users/>*/}
+                <TestComponent />
             </AppContext.Provider>
         </div>
     );
