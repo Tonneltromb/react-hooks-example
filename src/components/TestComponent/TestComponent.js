@@ -4,8 +4,9 @@ import readXlsxFile from 'read-excel-file'
 // import './TestComponent.css'
 
 const TestComponent = (props) => {
+    // флаг загрузки файла
     const [fileSelected, setFileSelected] = useState(false);
-    // массив данных таблицы, спроецированных на объекты
+    // данные таблицы в виде объектов
     const [rowData, setRowData] = useState([]);
     // массив объектов, подготовленных к отправке(готовые документы)
     const [sendData, setSendData] = useState([]);
@@ -17,12 +18,6 @@ const TestComponent = (props) => {
     const [dateColumnName, setDateColumnName] = useState('');
     // название колонки с суммой оплаты
     const [payColumnName, setPayColumnName] = useState(0);
-    // флаг неверно указанного имени колонки с лицевым счетом
-    const [wrongBillColumnName, setWrongBillColumnName] = useState(false);
-    // флаг неверно указанного имени колонки с датой создания
-    const [wrongDateColumnName, setWrongDateColumnName] = useState(false);
-    // флаг неверно указанного имени колонки с суммой оплаты
-    const [wrongPayColumnName, setWrongPayColumnName] = useState(false);
     // ставка ндс
     const [rate, setRate] = useState(0);
     // номер телефона по-умолчанию
@@ -119,33 +114,6 @@ const TestComponent = (props) => {
         });
         setSendData(_sendData);
     };
-    const selectBillColumnName = (name) => {
-        const billValue = rowData[0][name];
-        if (Number.parseInt(billValue) && billValue.length >= 9) {
-            setBillColumnName(name);
-            setWrongBillColumnName(false);
-        } else {
-            setWrongBillColumnName(true);
-        }
-    };
-    const selectPayColumnName = (name) => {
-        const payValue = rowData[0][name];
-        if (Number.parseFloat(payValue)) {
-            setPayColumnName(name);
-            setWrongPayColumnName(false);
-        } else {
-            setWrongPayColumnName(true);
-        }
-    };
-    const selectDateColumnName = (name) => {
-        const dateValue = rowData[0][name];
-        if (Date.parse(dateValue) && dateValue.split('.').length === 3) {
-            setDateColumnName(name);
-            setWrongDateColumnName(false);
-        } else {
-            setWrongDateColumnName(true);
-        }
-    };
     const selectPhoneColumnName = (name) => {
 
     };
@@ -159,14 +127,33 @@ const TestComponent = (props) => {
         setEmail(event.target.value);
     };
     // Функции валидации
+    const isSelectedBillColumnValid = () => {
+        const billValue = rowData[0][billColumnName];
+        return Number.parseInt(billValue) && billValue.length >= 9;
+    };
+    const isSelectedPayColumnValid = () => {
+        const payValue = rowData[0][payColumnName];
+        return Number.parseFloat(payValue);
+    };
+    const isSelectedDateColumnValid = () => {
+        const dateValue = rowData[0][dateColumnName];
+        return Date.parse(dateValue) && dateValue.split('.').length === 3;
+    };
     const isPhoneNumberValid = () => {
-       return phoneNumber && phoneNumber.search(/^(\+7|8)\d{10}$/g) !== -1;
+        return phoneNumber && phoneNumber.search(/^(\+7|8)\d{10}$/g) !== -1;
     };
     const isEmailValid = () => {
-       return email && email.search(/[A-Za-z0-9_]@{1}[A-Za-z0-9_]+\.[A-Za-z0-9_]+/gi) !== -1;
+        return email && email.search(/[A-Za-z0-9_]@{1}[A-Za-z0-9_]+\.[A-Za-z0-9_]+/gi) !== -1;
+    };
+    const isRateValid = () => {
+        return true;
     };
     const canCreateDocuments = () => {
-        return !isEmailValid() || !isPhoneNumberValid() || ;
+        return isEmailValid()
+            && isPhoneNumberValid()
+            && isSelectedBillColumnValid()
+            && isSelectedPayColumnValid()
+            && isSelectedDateColumnValid();
     };
 
     return (
@@ -178,40 +165,40 @@ const TestComponent = (props) => {
                         <span>Выберите колонку с лицевым счетом</span><br/>
                         <select
                             name="bill"
-                            onChange={(e) => selectBillColumnName(e.target.value)}
+                            onChange={(e) => setBillColumnName(e.target.value)}
                         >
                             <option></option>
                             {columnNames.map((row) => {
                                 return <option key={`bill-${row}`} value={row}>{row}</option>
                             })}
                         </select>
-                        {wrongBillColumnName ? <span>Выбрана неверная колонка</span> : null}
+                        {!isSelectedBillColumnValid() ? <span>Выбрана неверная колонка</span> : null}
                         <br/>
                         <br/>
                         <span>Выберите колонку с суммой платежа</span><br/>
                         <select
                             name="pay"
-                            onChange={(e) => selectPayColumnName(e.target.value)}
+                            onChange={(e) => setPayColumnName(e.target.value)}
                         >
                             <option></option>
                             {columnNames.map((row) => {
                                 return <option key={`pay-${row}`} value={row}>{row}</option>
                             })}
                         </select>
-                        {wrongPayColumnName ? <span>Выбрана неверная колонка</span> : null}
+                        {!isSelectedPayColumnValid() ? <span>Выбрана неверная колонка</span> : null}
                         <br/>
                         <br/>
                         <span>Выберите колонку с датой платежа</span><br/>
                         <select
                             name="date"
-                            onChange={(e) => selectDateColumnName(e.target.value)}
+                            onChange={(e) => setDateColumnName(e.target.value)}
                         >
                             <option></option>
                             {columnNames.map((row) => {
                                 return <option key={`date-${row}`} value={row}>{row}</option>
                             })}
                         </select>
-                        {wrongDateColumnName ? <span>Выбрана неверная колонка</span> : null}
+                        {!isSelectedDateColumnValid() ? <span>Выбрана неверная колонка</span> : null}
                         <br/>
                         <br/>
                         <span>Выберите колонку, содержащую номер телефона (необязательно)</span><br/>
@@ -246,14 +233,14 @@ const TestComponent = (props) => {
                         </select>
                         <br/>
                         <br/>
-                        <p>Пожалуйста, заполните следующие поля. Их значения будут использованы в случае отсутствия в записи номера телефона и почтового ящика</p>
-                        <br/>
-                        <br/>
+                        <p>Пожалуйста, заполните следующие поля. Их значения будут использованы в случае отсутствия в
+                            записи номера телефона и почтового ящика</p>
                         <input type="text"
                                placeholder='Введите номер телефона'
                                value={phoneNumber}
                                onChange={onPhoneNumberInputChange}/>
-                        {!isPhoneNumberValid() ? <span>Поле не заполнено, либо не соответствует одному из шаблонов(8xxxxxxxxxx, +7xxxxxxxxxx)</span> : null}
+                        {!isPhoneNumberValid() ?
+                            <span>Поле не заполнено, либо не соответствует одному из шаблонов(8xxxxxxxxxx, +7xxxxxxxxxx)</span> : null}
                         <br/>
                         <br/>
                         <input type="text"
@@ -263,7 +250,7 @@ const TestComponent = (props) => {
                         {!isEmailValid() ? <span>Поле не заполнено, либо заполнено некорректно</span> : null}
                         <br/>
                         <br/>
-                        <button onClick={prepareSendData} disabled={canCreateDocuments()}>Create entities</button>
+                        <button onClick={prepareSendData} disabled={!canCreateDocuments()}>Create entities</button>
                         <br/>
                         <br/>
                         <pre>{sendData.length ? JSON.stringify(sendData, null, 2) : null}</pre>
